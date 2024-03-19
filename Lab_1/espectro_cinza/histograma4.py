@@ -52,21 +52,14 @@ def aplicar_metodo(metodo, registros):
 
 
 def metodos_comparacao(metodo_id):
-    if metodo_id == 1:
-        metodo = "dist_euclidiana"    # Meramente para identificação (foi implementada dentro da função "aplicar_metodo")
-    elif metodo_id == 2:
-        metodo = cv2.HISTCMP_CORREL
-    elif metodo_id == 3:
-        metodo = cv2.HISTCMP_CHISQR
-    elif metodo_id == 4:
-        metodo = cv2.HISTCMP_INTERSECT
-    elif metodo_id == 5:
-        metodo = cv2.HISTCMP_BHATTACHARYYA
-    else:
-        print("Código inserido é inválido!")
-        sys.exit(1)
-
-    return metodo
+    metodos = {
+        1: "dist_euclidiana",
+        2: cv2.HISTCMP_CORREL,
+        3: cv2.HISTCMP_CHISQR,
+        4: cv2.HISTCMP_INTERSECT,
+        5: cv2.HISTCMP_BHATTACHARYYA
+    }
+    return metodos.get(metodo_id, None)
     
 
 
@@ -106,8 +99,12 @@ def main():
     dir = sys.argv[2]
     metodo_id = int(sys.argv[1])
 
+    # Armazenando dados em estruturas de dados (RegistroImagem)
     registros = criar_registros(dir)
     metodo = metodos_comparacao(metodo_id)
+    if metodo is None:
+        print("Código inserido é inválido!")
+        sys.exit(1)
     registros = aplicar_metodo(metodo, registros)
 
     # Aplicar KNN
@@ -126,6 +123,7 @@ def main():
 
         k_vizinhos = relacoes[0:K]
         
+        #Teste
         print("Amostra:", registro.nome_imagem)
         print("K-vizinhos:", k_vizinhos)
 
@@ -137,26 +135,15 @@ def main():
 
         y_pred.append(classe_frequente)
 
-    # classe_escolhida = mode(classes_vizinhos)
-    # y_pred.append(classe_escolhida)
-    # print("Classe escolhida:", classe_escolhida)
 
-
-    # agora faz y_data pegando as classes certas
-    # tipo, o nome da imagem é b5, a classe é b (atribui um valor a essa classe)
-    # tipo, o nome da imagem é l2, a classe é l (atribui um valor a essa classe)
-    # tipo, o nome da imagem é h1, a classe é h (atribui um valor a essa classe)
-    # tipo, o nome da imagem é mg3, a classe é mg (atribui um valor a essa classe)
-    # tipo, o nome da imagem é m5, a classe é m (atribui um valor a essa classe)
-    # tenha em mente que serão 5 classes, sendo que cada classe possui 5 imagens, então y_data vai ficar com tamanho 25
     y_data = []
     for registro in registros:
         # Apartar o nome da imagem usando "/" como separador e pegar a última parte
         partes_nome = registro.nome_imagem.split("/")
-        nome = partes_nome[-1]
+        nome_com_extensao = partes_nome[-1]
 
         # Excluir a extensão e os números
-        nome_sem_extensao = nome.split(".")[0]
+        nome_sem_extensao = nome_com_extensao.split(".")[0]
         nome_apenas_caracteres = re.findall("[a-zA-Z]", nome_sem_extensao)
         classe = "".join(nome_apenas_caracteres)
         y_data.append(classe)
