@@ -11,51 +11,62 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 
-
+###############################
+#
+# Classe criada para auxiliar na manipulação de dados.
+#
+# - classe: classe a qual a imagem pertence (ex.: H3 pertence à classe H)
+#
+# - histogramas: tupla que armazena os histogramas da imagem 
+# (ex.: histogramas = (hist_azul, hist_verde, hist_verm))
+#
+# - comparacoes: vetor de tuplas que armazena o resultado de "compHist"
+# entre a imagem pivo e as 24 restantes. Assim, o vetor "comparacoes"
+# possui 24 indices, cada um correspondendo a uma tupla do tipo 
+# (nome, comparacao_azul, comparacao_ver, comparacao_verm) que armazena 
+# os dados gerados após a comparação dos histogramas pivo com os demais
+#
+# - posteriormente, os dados armazenados no vetor "comparacoes" serão utilizados
+# como as variáveis para calcular a norma vetorial (x=canal_azul, y=canal_verde, z=canal_verm).
+# Optei por essa abordagem pois considerei ser mais fácil de relacionar os 3 canais de cor
+# para então pegar o k-vizinhos.
+#
+###############################
 class RegistroImagem:
-    def __init__(self, classe, histogramas, relacao_comparacoes):
+    def __init__(self, classe, histogramas, comparacoes):
         self.classe = classe
         self.histogramas = histogramas
-        self.relacao_comparacoes = relacao_comparacoes
+        self.comparacoes = comparacoes
 
 def aplicar_knn(metodo_id, registros):
 
-    N = len(registros)
     K = 3
     y_pred = []
     for registro in registros:
         tuplas_vetoriais = []
-        for i in range(len(registro.relacao_comparacoes)):
-            x = registro.relacao_comparacoes[i][1]
-            y = registro.relacao_comparacoes[i][2]
-            z = registro.relacao_comparacoes[i][3]
+        for i in range(len(registro.comparacoes)):
+            # Cálculo do módulo vetorial da imagem comparada de indice "i"
+            x = registro.comparacoes[i][1]
+            y = registro.comparacoes[i][2]
+            z = registro.comparacoes[i][3]
             x2 = x ** 2
             y2 = y ** 2
             z2 = z ** 2
             soma = x2 + y2 + z2
             norma = np.sqrt(soma)
-            #print("i:", i)
-            #print("x:", x)
-            #print("y:", y)
-            #print("z:", z)
-            #print()
-            tupla = (registro.relacao_comparacoes[i][0], norma)
+
+            # tupla = (classe_imagem_comparada, norma_vetorial_imagem_comparada)
+            tupla = (registro.comparacoes[i][0], norma)
             tuplas_vetoriais.append(tupla)
 
-        #print("Arquivo:", registro.classe)
-        #print("Tuplas vetoriais:")
-        #print(tuplas_vetoriais)
-
-        if metodo_id == 2 or metodo_id == 4:    # Métricas: correlação e interseção
+        if metodo_id == 2 or metodo_id == 4:
+            # Métricas: correlação e interseção
             tuplas_vetoriais.sort(key=lambda x: x[1], reverse=True)
-        else:                                   # Métricas: Chi Sqr, Bhattacharyya e Dist. Euclidiana
+        else:
+            # Métricas: Chi Sqr, Bhattacharyya e Dist. Euclidiana                               
             tuplas_vetoriais.sort(key=lambda x: x[1])
 
         k_vizinhos = tuplas_vetoriais[0:K]
-        
-        #Teste
-        print("Amostra:", registro.classe)
-        print("K-vizinhos:", k_vizinhos)
 
         # Conta as classes dentre os k vizinhos
         contagem_classes = Counter(tupla[0] for tupla in k_vizinhos)
@@ -87,19 +98,27 @@ def aplicar_metodo(metodo, registros):
                 hist_iterado_verm = registros[j].histogramas[2]
 
                 if metodo == "dist_euclidiana":
+                    # Dist. Euclidiana para o canal azul
                     soma_azul = np.sum((hist_pivo_azul - hist_iterado_azul) ** 2)
                     pontuacao_azul = np.sqrt(soma_azul)
+
+                    # Dist. Euclidiana para o canal verde
                     soma_verde = np.sum((hist_pivo_verde - hist_iterado_verde) ** 2)
                     pontuacao_verde = np.sqrt(soma_verde)
+
+                    # Dist. Euclidiana para o canal vermelho
                     soma_verm = np.sum((hist_pivo_verm - hist_iterado_verm) ** 2)
                     pontuacao_verm = np.sqrt(soma_verm)
+
                 else:
+                    # Aplicação das demais métricas (correlação, interseção, etc...)
                     pontuacao_azul = cv2.compareHist(hist_pivo_azul, hist_iterado_azul, metodo)
                     pontuacao_verde = cv2.compareHist(hist_pivo_verde, hist_iterado_verde, metodo)
                     pontuacao_verm = cv2.compareHist(hist_pivo_verm, hist_iterado_verm, metodo)
 
+                # Armazena os histogramas em tuplas e guarda na estrutura de dados
                 relacao = (registros[j].classe, pontuacao_azul, pontuacao_verde, pontuacao_verm)
-                registros[i].relacao_comparacoes.append(relacao)
+                registros[i].comparacoes.append(relacao)
     
     return registros
 
@@ -117,17 +136,13 @@ def metodos_comparacao(metodo_id):
 
 
 def criar_registros(dir):
-    arquivos = glob.glob(dir + "/*.bmp")
 
-    # Testar
-    print("arquivos:")
-    for arquivo in arquivos:
-        print(arquivo)
+    # Armazenando o banco de iamgens
+    arquivos = glob.glob(dir + "/*.bmp")
 
     registros = []
     
     for arquivo in arquivos:
-
         # Manipulamos o nome da imagem para associá-la a sua respectiva classe
         partes_nome = arquivo.split("/")
         nome_com_extensao = partes_nome[-1]
@@ -137,14 +152,13 @@ def criar_registros(dir):
 
         # Estabelecemos a imagem pivo e calculamos seus histogramas
         imagem = cv2.imread(arquivo)
-
         hist_azul = cv2.calcHist([imagem], [0], None, [256], [0,256])
-        cv2.normalize(hist_azul, hist_azul, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-
         hist_verde = cv2.calcHist([imagem], [1], None, [256], [0,256])
-        cv2.normalize(hist_verde, hist_verde, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-
         hist_verm = cv2.calcHist([imagem], [2], None, [256], [0,256])
+        
+        # Normalização dos histogramas
+        cv2.normalize(hist_azul, hist_azul, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+        cv2.normalize(hist_verde, hist_verde, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
         cv2.normalize(hist_verm, hist_verm, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
         histogramas = (hist_azul, hist_verde, hist_verm)
@@ -171,29 +185,10 @@ def main():
     if metodo is None:
         print("Código inserido é inválido!")
         sys.exit(1)
-    registros = aplicar_metodo(metodo, registros)
-
-    
-    print("Classe: "+registros[0].classe)
-    print("HIstogramas::")
-    print("Azul:")
-    print(registros[0].histogramas[0])
-    print("Verde:")
-    print(registros[0].histogramas[1])
-    print("Vermelho:")
-    print(registros[0].histogramas[2])
-    print("Relações::")
-    print(registros[0].relacao_comparacoes)
-    
+    registros = aplicar_metodo(metodo, registros)    
 
     # Aplicar KNN
     y_data, y_pred = aplicar_knn(metodo_id, registros)
-
-    print("y_data::")
-    print(y_data)
-
-    print("y_pred::")
-    print(y_pred)
 
     # Calcular acurácia e matriz de confusão
     soma = 0
@@ -201,8 +196,7 @@ def main():
         if y_pred[i] == y_data[i]:
             soma = soma + 1
     acuracia = soma/ len(y_data)
-    acuracia_formatada = "{:.4f}".format(acuracia)
-    print("Acurácia:", acuracia_formatada)
+    print("Acurácia:", acuracia)
 
     matriz_confusao = confusion_matrix(y_data, y_pred)
     print("Matriz de Confusão:")
