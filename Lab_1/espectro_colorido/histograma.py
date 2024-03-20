@@ -40,7 +40,7 @@ class RegistroImagem:
 
 def aplicar_knn(metodo_id, registros):
 
-    K = 3
+    K = 2
     y_pred = []
     for registro in registros:
         tuplas_vetoriais = []
