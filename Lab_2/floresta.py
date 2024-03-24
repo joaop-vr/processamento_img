@@ -1,45 +1,59 @@
-'''import sys
-import c v2
-import numpy a s np
-
-def main():
-
-    if len(sys.argv) < 3:
-        print("Comando esperado: histograma.py <img_entrada> <img_saida>.")
-        sys.exit(1)
-
-    input_img = sys.argv[1]
-    output_img = sys.argv[2]
-
-    print("Imagem de entrada: " + input_img)
-    print("Imagem de saída: " + output_img)
-
-if __name__ == "__main__":
-    main()
-   ''' 
 import sys
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 
-img = cv2.imread(sys.argv[1])
-hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+def calc_hist(imagem, versao):
 
-mask = cv2.inRange(hsv, (5, 75, 25), (25, 255, 255))
+    # Carrega a imagem
+    img = cv2.imread(imagem)
 
-imask = mask > 0
+    # Calcular o histograma de cada canal de cor da imagem colorida
+    hist_blue = cv2.calcHist([img], [0], None, [256], [0,256])
+    hist_green = cv2.calcHist([img], [1], None, [256], [0,256])
+    hist_red = cv2.calcHist([img], [2], None, [256], [0,256])
 
-orange = np.zeros_like(img, np.uint8)
-orange[imask] = img[imask]
+    # Plotar os histogramas de cada canal de cor da imagem colorida
+    plt.figure()
+    plt.plot(hist_blue, color='blue', label='Canal Azul')
+    plt.plot(hist_green, color='green', label='Canal Verde')
+    plt.plot(hist_red, color='red', label='Canal Vermelho')
+    plt.title("Imagem:" + versao)
+    plt.xlabel("Intensidade")
+    plt.ylabel("Frequência")
+    plt.legend()
 
-yellow = img.copy()
-hsv[..., 0] = hsv[..., 0] + 20
-yellow[imask] = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)[imask]
-yellow = np.clip(yellow, 0, 255)
-cv2.imshow("img", yellow)
-cv2.waitKey()
+    plt.show()
 
-nofish = img.copy()
-nofish = cv2.bitwise_and(nofish, nofish, mask=(np.bitwise_not(imask)).astype(np.uint8))
-cv2.imshow("img", nofish)
+def segment_forest(input_image_path, output_image_path):
+    # Carrega a imagem de entrada
+    img = cv2.imread(input_image_path)
 
-cv2.waitKey()
+    # Teste
+    calc_hist(input_image_path, "Original")
+
+    # Converte a imagem para o espaço de cores HSV
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+    # Define os limites inferior e superior para a cor verde no espaço de cores HSV
+    lower_green = np.array([36, 25, 25])  # Valores aproximados para o verde no espaço HSV
+    upper_green = np.array([86, 255, 255]) # Valores aproximados para o verde no espaço HSV
+
+    # Cria a máscara para a cor verde
+    mask = cv2.inRange(hsv, lower_green, upper_green)
+
+    # Aplica a máscara para realçar a área de interesse (floresta)
+    segmented_image = cv2.bitwise_and(img, img, mask=mask)
+
+    # Salva a imagem segmentada
+    cv2.imwrite(output_image_path, segmented_image)
+
+    calc_hist(output_image_path, "Final")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python3 floresta.py input_image_path output_image_path")
+    else:
+        input_image_path = sys.argv[1]
+        output_image_path = sys.argv[2]
+        segment_forest(input_image_path, output_image_path)
