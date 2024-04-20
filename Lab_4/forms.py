@@ -164,10 +164,9 @@ def segment_form(img_path, rois):
 
     saida = img_path[-11:-4] + "_saida.png"
     cv2.imwrite(saida, img)
-    cv2.destroyAllWindows()
 
 
-def define_rois():
+def define_rois_form_1():
 
     rois = []
 
@@ -198,6 +197,73 @@ def define_rois():
     return rois
 
 
+def define_rois_form_2():
+
+    rois = []
+
+    # Coordenadas pré estabelecidas para as áreas de interesse (ROI)
+    roi_0 = (850, 700, 1560, 150)
+    roi_1 = (850, 870, 1560, 150)
+    roi_2 = (850, 1050, 1560, 150)
+    roi_3 = (850, 1250, 1560, 150)
+    roi_4 = (850, 1425, 1560, 150)
+    roi_5 = (850, 1600, 1560, 150)
+    roi_6 = (850, 1780, 590, 200)
+    roi_7 = (70, 2090, 600, 200)
+    roi_8 = (1330, 2095, 700, 195)
+    roi_9 = (900, 2290, 1490, 220)
+
+    # Adiciona os rois à lista global
+    rois.append(roi_0)
+    rois.append(roi_1)
+    rois.append(roi_2)
+    rois.append(roi_3)
+    rois.append(roi_4)
+    rois.append(roi_5)
+    rois.append(roi_6)
+    rois.append(roi_7)
+    rois.append(roi_8)
+    rois.append(roi_9)
+
+    return rois
+
+
+def remove_labels(img_path):
+
+    # Carregar imagem
+    img = cv2.imread(img_path)
+
+    rois = []
+
+    # Coordenadas pré estabelecidas para as áreas de interesse (ROI)
+    roi_0 = (980, 700, 350, 1050)
+    roi_1 = (1470, 700, 170, 1050)
+    roi_2 = (1900, 700, 140, 1050)
+    roi_3 = (2240, 700, 130, 1050)
+
+    # Adiciona os rois à lista global
+    rois.append(roi_0)
+    rois.append(roi_1)
+    rois.append(roi_2)
+    rois.append(roi_3)
+
+    for i in range(len(rois)):
+
+        # Variáveis delimitadoras da região de interesse (ROI)
+        x, y, w, h = rois[i]
+        cv2.rectangle(img, (x,y), (x+w, y+h), (0,255, 0), 2)
+
+        # Recortar região de interesse (ROI)
+        roi = img[y:y+h, x:x+w]
+    
+        img[y-2:y+h+2, x-2:x+w+2] = 255
+
+
+    saida = img_path[-11:-4] + "_labels_deleted.png"
+    cv2.imwrite(saida, img)
+
+
+
 def main(rois, input_dir, output_dir=None):
     
     # Verifica se o diretório de saída existe e criar se não existe
@@ -211,10 +277,21 @@ def main(rois, input_dir, output_dir=None):
     for arquivo in os.listdir(input_dir):
         img_path = os.path.join(input_dir, arquivo)
 
-        # Segmentar os formulários
-        segment_form(img_path, rois)
+        # Carregar imagem
+        img = cv2.imread(img_path)
 
-    
+        # Binarizar a imagem
+        _, imagem_binarizada = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+
+        img_path_2 = img_path[-11:-4] + "_binary.png"
+        cv2.imwrite(img_path_2, imagem_binarizada)
+
+        # Remove os labels
+        remove_labels(img_path_2)
+
+        # Segmentar os formulários
+        segment_form(img_path_2, rois)
+
 
     # Ver se tem <dir_saida>
         # Se tiver então geramos as imgs de saida e o results.txt
@@ -228,5 +305,5 @@ if __name__ == "__main__":
     input_dir = sys.argv[1]
     output_dir = sys.argv[2] if len(sys.argv) > 2 else None
 
-    rois = define_rois()
+    rois = define_rois_form_2()
     main(rois, input_dir, output_dir)
