@@ -62,6 +62,8 @@ def segment_form(img_path, rois):
     # Carregar imagem
     img = cv2.imread(img_path)
 
+    print(f"arquivo atual::{img_path}")
+
     for i in range(len(rois)):
 
         # Variáveis delimitadoras da região de interesse (ROI)
@@ -91,7 +93,7 @@ def segment_form(img_path, rois):
             # Retorna o valor do menor magnitude e o índice
             #min_magnitude_value = histogram[min_magnitude_index]
 
-            # Extrai o campo central de cada tupla (índice 1)
+            # Extrai o campo central de cada tupla do histograma (índice 1)
             central_values = [tup[1] for tup in histogram[2:-2]]
             
             # Calcula os valores absolutos
@@ -110,6 +112,42 @@ def segment_form(img_path, rois):
             else:
                 print(filename + " -> No\n")
 
+        if i == 9:
+            # Defina os índices de início e fim do histograma
+            inicio_histo = 2
+            fim_histo = -2
+            histograma_cortado = histogram[inicio_histo:fim_histo]
+
+            # Valor de guarda
+            threshold_variancia = 100 
+
+            # Divida o eixo X do histograma cortado em 10 intervalos iguais
+            num_intervalos = 10
+            intervalo_tamanho = len(histograma_cortado) // num_intervalos
+
+            # Calcule a variância para cada intervalo no eixo X
+            variâncias = []
+            for i in range(num_intervalos):
+                inicio = i * intervalo_tamanho
+                fim = (i + 1) * intervalo_tamanho
+                sub_histograma = histograma_cortado[inicio:fim]
+                variância_atual = np.var(sub_histograma)
+                
+                # Aplicar o valor de guarda
+                if variância_atual <= threshold_variancia:
+                    variâncias.append(variância_atual)
+                else:
+                    variâncias.append(0)  # Ou outro valor que indique que o intervalo foi ignorado
+
+
+            # Encontre o intervalo com a maior variância
+            indice_max_variancia = np.argmax(variâncias)
+            max_variancia = variâncias[indice_max_variancia]
+
+            print(f"Variancias:{variâncias}\n")
+
+            print(f"Última resposta da imagem {img_path}: {indice_max_variancia+1}\n")
+
         # Plotar
         plt.figure(figsize=(10, 5))
         plt.plot(histogram, color='black')
@@ -124,7 +162,8 @@ def segment_form(img_path, rois):
         plt.savefig(graphic)
         plt.close()
 
-    cv2.imwrite("saida.png", img)
+    saida = img_path[-11:-4] + "_saida.png"
+    cv2.imwrite(saida, img)
     cv2.destroyAllWindows()
 
 
