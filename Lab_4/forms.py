@@ -81,6 +81,10 @@ def segment_form(img_path, rois):
         # Calcular o histograma ao longo do eixo X
         histogram = np.sum(img_segmented, axis=0)
 
+        if i == 0:
+            soma = np.sum(histogram)
+            print(f"soma:{soma}")
+
         # Normalizar o histograma
         histogram = histogram / np.max(histogram)
 
@@ -171,6 +175,7 @@ def define_rois_form_1():
     rois = []
 
     # Coordenadas pré estabelecidas para as áreas de interesse (ROI)
+    roi_0 = (900, 20, 625, 170)
     roi_1 = (850, 760, 1560, 120)
     roi_11 = (850, 950, 1560, 110)
     roi_12 = (850, 1120, 1560, 120)
@@ -182,7 +187,9 @@ def define_rois_form_1():
     roi_4 = (1330, 2070, 700, 220)
     roi_5 = (900, 2290, 1480, 220)
 
+
     # Adiciona os rois à lista global
+    rois.append(roi_0)
     rois.append(roi_1)
     rois.append(roi_11)
     rois.append(roi_12)
@@ -209,8 +216,8 @@ def define_rois_form_2():
     roi_4 = (850, 1425, 1560, 150)
     roi_5 = (850, 1600, 1560, 150)
     roi_6 = (850, 1780, 590, 200)
-    roi_7 = (70, 2090, 600, 200)
-    roi_8 = (1330, 2095, 700, 195)
+    roi_7 = (70, 2110, 600, 200)
+    roi_8 = (1330, 2120, 700, 170)
     roi_9 = (900, 2290, 1490, 220)
 
     # Adiciona os rois à lista global
@@ -236,16 +243,29 @@ def remove_labels(img_path):
     rois = []
 
     # Coordenadas pré estabelecidas para as áreas de interesse (ROI)
-    roi_0 = (980, 700, 350, 1050)
-    roi_1 = (1470, 700, 170, 1050)
-    roi_2 = (1900, 700, 140, 1050)
-    roi_3 = (2240, 700, 130, 1050)
+    roi_1 = (980, 700, 350, 1050)
+    roi_2 = (1470, 700, 170, 1050)
+    roi_3 = (1900, 700, 140, 1050)
+    roi_4 = (2240, 700, 130, 1050)
+    roi_5 = (990, 1820, 130, 120)
+    roi_6 = (1350, 1820, 130, 120)
+    roi_7 = (210, 2130, 100, 120)
+    roi_8 = (560, 2130, 100, 120)
+    roi_9 = (1480, 2130, 100, 120)
+    roi_10 = (1830, 2130, 100, 120)
 
     # Adiciona os rois à lista global
-    rois.append(roi_0)
     rois.append(roi_1)
     rois.append(roi_2)
     rois.append(roi_3)
+    rois.append(roi_4)
+    rois.append(roi_5)
+    rois.append(roi_6)
+    rois.append(roi_7)
+    rois.append(roi_8)
+    rois.append(roi_9)
+    rois.append(roi_10)
+
 
     for i in range(len(rois)):
 
@@ -263,6 +283,32 @@ def remove_labels(img_path):
     cv2.imwrite(saida, img)
 
 
+def apartation(img_path, i):
+
+    img = cv2.imread(img_path)
+
+    x, y, w, h = (900, 20, 625, 170)
+    cv2.rectangle(img, (x,y), (x+w, y+h), (255,0, 255), 2)
+
+    # Recortar região de interesse (ROI)
+    roi = img[y:y+h, x:x+w]
+
+    # Salvar o ROI
+    filename = "roi"+str(i) +".png"
+    cv2.imwrite(filename, roi)
+
+    # Calcular o histograma ao longo do eixo X
+    img_2 = cv2.imread(filename)
+    histogram = np.sum(img_2, axis=0)
+
+    soma = np.sum(histogram)
+    print(f"soma:{soma}")
+            
+    if soma > 70000000:
+        print("Ficha2: " + img_path)
+    else:
+        print("Ficha1: " + img_path)
+    
 
 def main(rois, input_dir, output_dir=None):
     
@@ -273,24 +319,31 @@ def main(rois, input_dir, output_dir=None):
     # Lista de resultados
     results = []
 
+    
+    i = 0
     # Processa os arqs no diretório de entrada
     for arquivo in os.listdir(input_dir):
+
+        i = i + 1
         img_path = os.path.join(input_dir, arquivo)
 
         # Carregar imagem
         img = cv2.imread(img_path)
 
-        # Binarizar a imagem
-        _, imagem_binarizada = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+        apartation(img_path, i)
 
-        img_path_2 = img_path[-11:-4] + "_binary.png"
-        cv2.imwrite(img_path_2, imagem_binarizada)
+        # Binarizar a imagem
+        #_, imagem_binarizada = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+
+        #img_path_2 = img_path[-11:-4] + "_binary.png"
+        #cv2.imwrite(img_path_2, imagem_binarizada)
 
         # Remove os labels
-        remove_labels(img_path_2)
+        remove_labels(img_path)
 
         # Segmentar os formulários
-        segment_form(img_path_2, rois)
+        segment_form(img_path, rois)
+
 
 
     # Ver se tem <dir_saida>
