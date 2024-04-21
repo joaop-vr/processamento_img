@@ -41,9 +41,9 @@ def isForm_1(img_path):
     # O valor de limiar foi obtido após
     # analises de formulários do tipo 2
     if count < 70000000:
-        return 1    # FOrmulário do tipo 1
+        return 1
     else:
-        return 0    # Formulário do tipo 2
+        return 0
 
 
 def define_rois(id):
@@ -90,7 +90,10 @@ def define_rois(id):
     return rois
 
 
-def remove_labels(img):
+def remove_labels(img_path):
+
+    # Carrega imagem
+    img = cv2.imread(img_path)
 
     # Lista das áreas de interesse (ROI)
     rois = []
@@ -129,15 +132,24 @@ def remove_labels(img):
         roi = img[y:y+h, x:x+w]
         img[y-2:y+h+2, x-2:x+w+2] = 255
 
-    return img
+    output = img_path[-11:-4] + "_labels_deleted.me.png"
+    cv2.imwrite(output, img)
+
+    return output
 
 
-def remove_noise(img):
+def remove_noise(img_path):
+
+    img = cv2.imread(img_path, 0)
 
     # Aplica o filtro de mediana para remover ruídos
     denoised = cv2.medianBlur(img, 5)
 
-    return denoised
+    filename = img_path[:-4].split('/')[-1]
+    filename = "clean_" + filename + ".me.png"
+    cv2.imwrite(filename, denoised)
+
+    return filename
 
 
 def highlight_img(img):
@@ -158,11 +170,8 @@ def calc_sums(histogram, num_intervals, interval_size):
     sums = []
     for j in range(num_intervals):
         count = 0
-        # Determinação do intervalo
         start_interval = j * interval_size
         end_interval = (j + 1) * interval_size
-
-        # Calculo da soma do histograma no intervalo
         count = np.sum(histogram[start_interval:end_interval])
         sums.append(count)
 
@@ -174,14 +183,9 @@ def calc_variation(histogram, num_intervals, interval_size):
     # Calcula a variância do histograma para cada intervalo no eixo X
     variations = []
     for i in range(num_intervals):
-        # Determinação do intervalo
         start_interval = i * interval_size
         end_interval = (i + 1) * interval_size
-
-        # Recorte do histograma do intervalo
         sub_histograma = histogram[start_interval:end_interval]
-
-        # Calculo da variância no intervalo
         aux = np.var(sub_histograma)
         variations.append(aux)
 
@@ -229,9 +233,6 @@ def multiple_choice_questions(img, roi):
     result = None
     best_proportion = float('-inf')  # começa com o menor valor possível
 
-    # Calcula a proporção de varição por somatória dos intervalos
-    # e retorna o indice da melhor proporção, que é um
-    # indicativo de corresponder a uma resposta do formulário
     for j in range(len(variations)):
         if sums[j] != 0:  # evita divisão por zero
             proportion = variations[j] / sums[j]
@@ -256,7 +257,6 @@ def binary_questions(histogram):
     # Encontra o índice do menor valor em magnitude
     min_magnitude_index = absolute_values.argmin()
 
-    # Indica se a resposta foi Yes (return 0) ou No (return 1)
     if min_magnitude_index <= middle_index:
         return 0
     else:
@@ -283,11 +283,12 @@ def scalar_question(histogram):
     return min_sum_idx
 
 
-def segment_form(img, rois):
+def segment_form(img_path, rois):
 
+    # Carrega imagem
+    img = cv2.imread(img_path)
     results = []
 
-    # Itera sobre as áreas de interesse e obtém as respostas do formulário
     for i in range(len(rois)):
         if i <= 5:
             result = multiple_choice_questions(img, rois[i])
@@ -421,6 +422,22 @@ def generate_img_out(results, output_dir):
         cv2.imwrite(filename, img)
 
 
+def clean_directory():
+
+    # Diretório atual
+    directory = os.getcwd()
+    
+    # Percorre todos os arquivos no diretório
+    for filename in os.listdir(directory):
+        # Verifica se o arquivo tem a extensão .png
+        if filename.endswith('.me.png'):
+            # Cria o caminho completo do arquivo
+            filepath = os.path.join(directory, filename)
+            
+            # Remove o arquivo
+            os.remove(filepath)
+
+
 def main(input_dir, output_dir=None):
 
     # Lista de resultados
@@ -431,8 +448,6 @@ def main(input_dir, output_dir=None):
 
         # Obtém o caminho relativo ao arquivo
         img_path = os.path.join(input_dir, arquivo)
-
-        img = cv2.imread(img_path)
         original_name = img_path
 
         if is_image(img_path):
@@ -445,10 +460,10 @@ def main(input_dir, output_dir=None):
                 rois = define_rois(1)
             else:
                 rois = define_rois(2)
-                img = remove_labels(img)
+                img_path = remove_labels(img_path) # Remove os rótulos (Excellent, Good, etc)
 
             # Remove os ruídos (linhas pretas contínuas)
-            clean_img = remove_noise(img)
+            clean_img = remove_noise(img_path)
 
             # Segmentar os formulários
             form_results = segment_form(clean_img, rois)
@@ -471,6 +486,9 @@ def main(input_dir, output_dir=None):
         
         print("Gerando imagens out ...")
         generate_img_out(results, output_dir)
+
+    # Apaga as imagens criadas para deebug
+    clean_directory()
 
 
 if __name__ == "__main__":
