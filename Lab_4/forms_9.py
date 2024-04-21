@@ -183,11 +183,11 @@ def segment_form(img_path, rois):
             melhor_razao = float('-inf')  # começa com o menor valor possível
 
             for j in range(len(variations)):
-                    if sums[j] != 0:  # evita divisão por zero
-                        razao = variations[j] / sums[j]
-                        if razao > melhor_razao:
-                            melhor_razao = razao
-                            melhor_indice = j
+                if sums[j] != 0:  # evita divisão por zero
+                    razao = variations[j] / sums[j]
+                    if razao > melhor_razao:
+                        melhor_razao = razao
+                        melhor_indice = j
 
             print(f"Resposta de {i} da {img_path}: {melhor_indice+1}")
         else:
@@ -335,22 +335,16 @@ def main(input_dir, output_dir=None):
     # Processa os arqs do diretório de entrada
     for arquivo in os.listdir(input_dir):
 
-        print("Oi")
-
         # Obtém o caminho relativo ao arquivo
         img_path = os.path.join(input_dir, arquivo)
 
         rois = []
 
         if (isForm_1(img_path)):
-            print(f"O arquivo {arquivo} é Form 1")
             rois = define_rois(1)
         else:
-            print(f"O arquivo {arquivo} é Form 2")
             rois = define_rois(2)
-
-            # Remove os rótulos (Excellent, Good, etc)
-            img_path = remove_labels(img_path)
+            img_path = remove_labels(img_path) # Remove os rótulos (Excellent, Good, etc)
 
         # Remove os ruídos (linhas pretas contínuas)
         clean_img = remove_noise(img_path)

@@ -283,6 +283,8 @@ def remove_labels(img_path):
     cv2.imwrite(saida, img)
 
 
+
+
 def apartation(img_path, i):
 
     img = cv2.imread(img_path)
@@ -309,6 +311,46 @@ def apartation(img_path, i):
     else:
         print("Ficha1: " + img_path)
     
+
+def select_field_propotype(num_question, num_answer):
+
+    roi_1a = (50, 50, 50, 5)
+
+    # Variáveis delimitadoras da região de interesse (ROI)
+    x, y, w, h = roi_1a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,255, 0), 2)
+
+    cv2.imwrite(".png", img)
+
+def select_field(img_path):
+
+    roi_1a = (940, 860, 80, 5)
+
+    roi_1b = (1400, 860, 80, 5)
+    roi_1c = (1860, 860, 80, 5)
+
+    roi_2a = (940, 1040, 80, 5)
+
+    roi_2b = (1400, 1040, 80, 5)
+
+    img = cv2.imread(img_path)
+
+    # Variáveis delimitadoras da região de interesse (ROI)
+    x, y, w, h = roi_1a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_1b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_1c
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_2a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_2b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    cv2.imwrite("A_saida.png", img)
+
 
 def main(rois, input_dir, output_dir=None):
     
@@ -342,7 +384,8 @@ def main(rois, input_dir, output_dir=None):
         remove_labels(img_path)
 
         # Segmentar os formulários
-        segment_form(img_path, rois)
+        #segment_form(img_path, rois)
+        select_field(img_path)
 
 
 
