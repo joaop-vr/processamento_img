@@ -174,7 +174,31 @@ def define_rois_form_1():
 
     rois = []
 
+    # Lab4
+    """roi_1 = (850, 760, 1560, 120)
+    roi_2 = (850, 950, 1560, 110)
+    roi_3 = (850, 1120, 1560, 120)
+    roi_4 = (850, 1310, 1560, 120)
+    roi_5 = (850, 1490, 1560, 120)
+    roi_6 = (850, 1670, 1560, 90)
+    roi_7 = (850, 1840, 590, 140)
+    roi_8 = (70, 2160, 500, 150)
+    roi_9 = (1330, 2170, 600, 120)
+    roi_10 = (900, 2290, 1480, 220)
+
+    rois.append(roi_1)
+    rois.append(roi_2)
+    rois.append(roi_3)
+    rois.append(roi_4)
+    rois.append(roi_5)
+    rois.append(roi_6)
+    rois.append(roi_7)
+    rois.append(roi_8)
+    rois.append(roi_9)
+    rois.append(roi_10)"""
+
     # Coordenadas pré estabelecidas para as áreas de interesse (ROI)
+    # Forms.py
     roi_0 = (900, 20, 625, 170)
     roi_1 = (850, 760, 1560, 120)
     roi_11 = (850, 950, 1560, 110)
@@ -208,14 +232,15 @@ def define_rois_form_2():
 
     rois = []
 
+    """# Forms
     # Coordenadas pré estabelecidas para as áreas de interesse (ROI)
     roi_0 = (850, 700, 1560, 150)
-    roi_1 = (850, 870, 1560, 150)
+    roi_1 = (850, 870, 1560, 150)   # 0 ao 5 otimos para a ficha 2
     roi_2 = (850, 1050, 1560, 150)
     roi_3 = (850, 1250, 1560, 150)
     roi_4 = (850, 1425, 1560, 150)
     roi_5 = (850, 1600, 1560, 150)
-    roi_6 = (850, 1780, 590, 200)
+    roi_6 = (850, 1840, 590, 140)
     roi_7 = (70, 2110, 600, 200)
     roi_8 = (1330, 2120, 700, 170)
     roi_9 = (900, 2290, 1490, 220)
@@ -230,8 +255,31 @@ def define_rois_form_2():
     rois.append(roi_6)
     rois.append(roi_7)
     rois.append(roi_8)
-    rois.append(roi_9)
+    rois.append(roi_9)"""
 
+    # Lab4
+    # Coordenadas pré estabelecidas para as áreas de interesse (ROI) do Form 2
+    roi_1 = (850, 700, 1560, 150)
+    roi_2 = (850, 870, 1560, 150)
+    roi_3 = (850, 1050, 1560, 150)
+    roi_4 = (850, 1250, 1560, 150)
+    roi_5 = (850, 1425, 1560, 150)
+    roi_6 = (850, 1600, 1560, 150)
+    roi_7 = (850, 1780, 590, 200)
+    roi_8 = (70, 2110, 600, 200)
+    roi_9 = (1330, 2120, 700, 170)
+    roi_10 = (900, 2290, 1490, 220)
+
+    rois.append(roi_1)
+    rois.append(roi_2)
+    rois.append(roi_3)
+    rois.append(roi_4)
+    rois.append(roi_5)
+    rois.append(roi_6)
+    rois.append(roi_7)
+    rois.append(roi_8)
+    rois.append(roi_9)
+    rois.append(roi_10)
     return rois
 
 
@@ -324,6 +372,8 @@ def select_field_propotype(num_question, num_answer):
 
 def select_field(img_path):
 
+    """
+    # Ficha 1
     roi_1a = (940, 860, 80, 5)
 
     roi_1b = (1400, 860, 80, 5)
@@ -333,20 +383,115 @@ def select_field(img_path):
 
     roi_2b = (1400, 1040, 80, 5)
 
+    roi_3a = (920, 1940, 80, 5)
+    roi_3b = (1260, 1940, 80, 5)
+
+    roi_4a = (140, 2270, 80, 5)
+    roi_4b = (470, 2270, 80, 5)
+
+    roi_5a = (1430, 2270, 80, 5)
+    roi_5b = (1760, 2270, 80, 5)
+
+    roi_6_1 = (950, 2480, 80, 5)
+    roi_6_2 = (1090, 2480, 80, 5)
+
     img = cv2.imread(img_path)
 
+    
     # Variáveis delimitadoras da região de interesse (ROI)
+    
     x, y, w, h = roi_1a
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-
     x, y, w, h = roi_1b
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-
     x, y, w, h = roi_1c
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
     x, y, w, h = roi_2a
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
     x, y, w, h = roi_2b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_3a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_3b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_4a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_4b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_5a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_5b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_6_1
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_6_2
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)"""
+
+    
+    # Ficha 1
+    roi_1a = (910, 860, 80, 5)
+
+    roi_1b = (13700, 860, 80, 5)
+    roi_1c = (1830, 860, 80, 5)
+
+    roi_2a = (940, 1040, 80, 5)
+
+    roi_2b = (1400, 1040, 80, 5)
+
+    roi_3a = (920, 1940, 80, 5)
+    roi_3b = (1260, 1940, 80, 5)
+
+    roi_4a = (140, 2235, 80, 5)
+    roi_4b = (470, 2235, 80, 5)
+
+    roi_5a = (1430, 2235, 80, 5)
+    roi_5b = (1760, 2235, 80, 5)
+
+    roi_6_1 = (950, 2480, 80, 5)
+    roi_6_2 = (1090, 2480, 80, 5)
+
+    img = cv2.imread(img_path)
+
+    
+    # Variáveis delimitadoras da região de interesse (ROI)
+    
+    x, y, w, h = roi_1a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_1b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_1c
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_2a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_2b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_3a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_3b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_4a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_4b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_5a
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+    x, y, w, h = roi_5b
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_6_1
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
+
+    x, y, w, h = roi_6_2
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
 
     cv2.imwrite("A_saida.png", img)
