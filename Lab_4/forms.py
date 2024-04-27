@@ -488,7 +488,6 @@ def generate_img_out(results, output_dir):
 
         filename = result[0][:-4].split('/')[-1]
         filename = output_dir + "/" + filename + ".out.png"
-        print(filename)
         cv2.imwrite(filename, img)
 
 
@@ -507,8 +506,6 @@ def main(input_dir, output_dir=None):
         original_name = img_path
 
         if is_image(img_path):
-
-            print(f"Processando imagem {arquivo}...")
 
             # Lista de áreas de interesse
             rois = []
@@ -536,7 +533,7 @@ def main(input_dir, output_dir=None):
             print(f"{arquivo} não é uma imagem. Ignorando...")
 
     if results:
-        print("Gerando results.txt...")
+        # Gerando arquivo results
         generate_txt(results)
 
     if output_dir:
@@ -544,7 +541,7 @@ def main(input_dir, output_dir=None):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
-        print("Gerando imagens out...")
+        # Gerando imagens out
         generate_img_out(results, output_dir)
 
 
