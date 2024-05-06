@@ -17,7 +17,7 @@ def is_image(filename):
     image_type = imghdr.what(filename)
     
     # Retorna True se for um tipo de imagem conhecido
-    return image_type in ['jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff']
+    return image_type in ['jpeg', 'png', 'pdf','gif', 'bmp', 'webp', 'tiff']
 
 
 def define_threshold(img):
@@ -194,8 +194,11 @@ def remove_noise(img):
 
 
 def highlight_img(img):
-
-    # Defini o kernel 
+    if img is None:
+        print("A imagem de entrada está vazia.")
+        return None
+    
+    # Define o kernel 
     kernel = np.ones((3,3), np.uint8)
 
     # Aplica a erosão na imagem para realçar os detalhes perdidos 
@@ -503,36 +506,43 @@ def main(input_dir, output_dir=None):
         img_path = os.path.join(input_dir, arquivo)
 
         img = cv2.imread(img_path)
-        original_name = img_path
-
-        if is_image(img_path):
-
-            # Lista de áreas de interesse
-            rois = []
-
-            # Remove os ruídos (linhas pretas contínuas)
-            clean_img = remove_noise(img)
-
-            # Define o limiar referencial para calculo das áreas de interesse
-            x, y = define_threshold(clean_img)
-
-            if (isForm_1(img_path)):
-                rois = define_rois(1, x, y)
-            else:
-                rois = define_rois(2, x, y)
-                clean_img = remove_labels(clean_img)
-
-            # Segmentar os formulários
-            form_results = segment_form(clean_img, rois)
-
-            # Armazena o registro dos metadados do formulário
-            register = (original_name, form_results)
-            results.append(register)
-
+        if img is None:
+            print(f"Não foi possível ler a imagem em {img_path}.")
+            continue
         else:
-            print(f"{arquivo} não é uma imagem. Ignorando...")
+            original_name = img_path
+
+            if is_image(img_path):
+
+                print(f"Processando imagem {img_path[:-4].split('/')[-1]}.")
+
+                # Lista de áreas de interesse
+                rois = []
+
+                # Remove os ruídos (linhas pretas contínuas)
+                clean_img = remove_noise(img)
+
+                # Define o limiar referencial para calculo das áreas de interesse
+                x, y = define_threshold(clean_img)
+
+                if (isForm_1(img_path)):
+                    rois = define_rois(1, x, y)
+                else:
+                    rois = define_rois(2, x, y)
+                    clean_img = remove_labels(clean_img)
+
+                # Segmentar os formulários
+                form_results = segment_form(clean_img, rois)
+
+                # Armazena o registro dos metadados do formulário
+                register = (original_name, form_results)
+                results.append(register)
+
+            else:
+                print(f"{arquivo} não é uma imagem. Ignorando...")
 
     if results:
+        print("Gerando results.txt")
         # Gerando arquivo results
         generate_txt(results)
 
@@ -542,6 +552,7 @@ def main(input_dir, output_dir=None):
             os.makedirs(output_dir)
         
         # Gerando imagens out
+        print("Gerando imagens de saída...")
         generate_img_out(results, output_dir)
 
 
