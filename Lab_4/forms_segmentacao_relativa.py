@@ -17,7 +17,7 @@ def is_image(filename):
     image_type = imghdr.what(filename)
     
     # Retorna True se for um tipo de imagem conhecido
-    return image_type in ['jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff']
+    return image_type in ['jpeg', 'png', 'pdf','gif', 'bmp', 'webp', 'tiff']
 
 
 def define_threshold(img):
@@ -49,10 +49,11 @@ def define_threshold(img):
     idx_middle = (idx_mins[0]+idx_mins[1])//2
     x = 0
     y = idx_middle - 80
-    w = 2479
+    w = img.shape[1]-1
     h = 160
 
     roi = img[y:y+h, x:x+w]
+    _, binarized_roi = cv2.threshold(roi, 127, 255, cv2.THRESH_BINARY)
 
     # Variáveis para armazenar os índices do primeiro pixel preto
     first_black_y = None
@@ -61,7 +62,7 @@ def define_threshold(img):
     # Percorra a ROI binarizada para encontrar o primeiro pixel preto
     for i in range(roi.shape[0]): 
         for j in range(roi.shape[1]):  
-            if (roi[i, j] == 0).any():  # Se o pixel é preto
+            if (binarized_roi[i, j] == 0).any():  # Se o pixel é preto
                 first_black_y = i + y 
                 first_black_x = j + x 
                 break  # Sai do loop interno se encontrar o primeiro pixel preto
@@ -99,137 +100,36 @@ def isForm_1(img_path):
         return 0    # Formulário do tipo 2
 
 
-def define_rois(id, x, y, img, img_path):
-
-    kernel_dilate = np.ones((2,2), np.uint8)
-    img_aux = cv2.dilate(img, kernel_dilate, iterations=2)
-
-    kernel_erode = np.ones((3,3), np.uint8)
-    img_final = cv2.erode(img_aux, kernel_erode, iterations=3)
+def define_rois(id, x, y):
 
     # Lista de áreas de interesse
     rois = []
-
-    print(x,y)
-
     if id == 1:
         # Coordenadas pré estabelecidas para as áreas de interesse (ROI) do Form 1
-
-        mat = [[x+720, y+135, 380, 170],
-               [x+1200, y+135, 350, 170],
-               [x+1600, y+135, 350, 170],
-               [x+2000, y+135, 350, 170],]
-
-        for i in range(0,1):
-            for j in range(0,1):
-                x = mat[j][0]
-                y = mat[j][1] + 190*i
-                w = mat[j][2]
-                h = mat[j][3]
-                aux = (x, y, w, h)
-                rois.append(aux)
-                cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-        
-        """for i in range(24):
-
-        roi_1a = (x+650, y+150, 500, 175)
-        roi_1b = (x+1200, y+150, 350, 175)
-        roi_1c = (x+1600, y+150, 350, 175)
-        roi_1d = (x+2000, y+150, 350, 175)
-        roi_2a = (x+650, y+340, 500, 175)
-        roi_2b = (x+1200, y+340, 350, 175)
-        roi_2c = (x+1600, y+340, 350, 175)
-        roi_2d = (x+2000, y+340, 350, 175)
-        roi_3a = (x+650, y+150, 500, 175)
-        roi_3b = (x+1200, y+150, 350, 175)
-        roi_3c = (x+1600, y+150, 350, 175)
-        roi_3d = (x+2000, y+150, 350, 175)
-        roi_4a = (x+650, y+340, 500, 175)
-        roi_4b = (x+1200, y+340, 350, 175)
-        roi_4c = (x+1600, y+340, 350, 175)
-        roi_4d = (x+2000, y+340, 350, 175)
-        roi_9 = (1330, y+1639, 600, 120)
-        roi_10 = (900, y+1759, 1480, 220)"""
+        roi_1 = (x+722, y+229, 1560, 120) #
+        roi_2 = (x+722, y+419, 1560, 110)
+        roi_3 = (x+722, y+589, 1560, 120)
+        roi_4 = (x+722, y+779, 1560, 120)
+        roi_5 = (x+722, y+959, 1560, 120)
+        roi_6 = (x+722, y+1139, 1560, 90)
+        roi_7 = (x+680, y+1309, 620, 140)
+        roi_8 = (x-100, y+1629, 560, 150)
+        roi_9 = (x+1110, y+1639, 640, 120)
+        roi_10 = (x+700, y+1759, 1560, 220)
     else:
         # Coordenadas pré estabelecidas para as áreas de interesse (ROI) do Form 2
-        mat = [[x+720, y+150, 430, 175],
-               [x+1200, y+150, 350, 175],
-               [x+1600, y+150, 350, 175],
-               [x+2000, y+150, 350, 175],]
-            
-        for i in range(0,1):
-            for j in range(0,1):
-                x = mat[j][0]
-                y = mat[j][1] + 190*i
-                w = mat[j][2]
-                h = mat[j][3]
-                aux = (x, y, w, h)
-                rois.append(aux)
-                cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
+        roi_1 = (x+722, y+169, 1560, 150)
+        roi_2 = (x+722, y+339, 1560, 150)
+        roi_3 = (x+722, y+519, 1560, 150)
+        roi_4 = (x+722, y+719, 1560, 150)
+        roi_5 = (x+722, y+894, 1560, 150)
+        roi_6 = (x+722, y+1069, 1560, 150)
+        roi_7 = (x+722, y+1249, 590, 200)
+        roi_8 = (x-90, y+1590, 580, 150)
+        roi_9 = (x+1120, y+1590, 660, 120)
+        roi_10 = (x+720, y+1810, 1570, 170)
 
-
-        """roi_1a = (x+650, y+150, 500, 175)
-        roi_1b = (x+1200, y+150, 350, 175)
-        roi_1c = (x+1600, y+150, 350, 175)
-        roi_1d = (x+2000, y+150, 350, 175)
-        roi_2a = (x+650, y+340, 500, 175)
-        roi_2b = (x+1200, y+340, 350, 175)
-        roi_2c = (x+722, y+340, 350, 175)
-        roi_2d = (x+2000, y+340, 350, 175)
-        roi_9 = (1330, y+1569, 700, 170)
-        roi_10 = (900, y+1759, 1490, 220)"""
-
-    """x, y, w, h = roi_1a
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_1b
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_1c
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_1d
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-
-    x, y, w, h = roi_2a
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_2b
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_2c
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_2d
-    cv2.rectangle(img_final, (x,y), (x+w, y+h), (0,0, 255), 2)"""
-
-
-
-    """x, y, w, h = roi_3
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_4
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_5
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_6
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_7
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_8
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_9
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)
-    x, y, w, h = roi_10
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0, 255), 2)"""
-
-    #filename = "Roi_" + img_path[:-4].split('/')[-1] + ".png"
-    #cv2.imwrite(filename, roi)
-
-    filename = "Saida_" + img_path[:-4].split('/')[-1] + ".png"
-    cv2.imwrite(filename, img_final)
-
-    """rois.append(roi_1a)
-    rois.append(roi_1b)
-    rois.append(roi_1c)
-    rois.append(roi_1d)
-    rois.append(roi_2a)
-    rois.append(roi_2b)
-    rois.append(roi_2c)
-    rois.append(roi_2d)
+    rois.append(roi_1)
     rois.append(roi_2)
     rois.append(roi_3)
     rois.append(roi_4)
@@ -238,7 +138,7 @@ def define_rois(id, x, y, img, img_path):
     rois.append(roi_7)
     rois.append(roi_8)
     rois.append(roi_9)
-    rois.append(roi_10)"""
+    rois.append(roi_10)
 
     return rois
 
@@ -294,8 +194,11 @@ def remove_noise(img):
 
 
 def highlight_img(img):
-
-    # Defini o kernel 
+    if img is None:
+        print("A imagem de entrada está vazia.")
+        return None
+    
+    # Define o kernel 
     kernel = np.ones((3,3), np.uint8)
 
     # Aplica a erosão na imagem para realçar os detalhes perdidos 
@@ -365,47 +268,19 @@ def calc_histogram(img, roi):
     return cropped_histogram
 
 
-def multiple_choice_questions(img, roi, values, img_path):
+def multiple_choice_questions(img, roi):
 
     # Calcula o histograma
     histogram = calc_histogram(img, roi)
 
     # Divida o eixo X do histograma em 4 intervalos
     # um para cada pergunta
-    num_intervals = 1
+    num_intervals = 4
     interval_size = len(histogram) // num_intervals
 
     # Calcula os parâmetros necessários para estabelecer a resposta da pergunta
     sums = calc_sums(histogram, num_intervals, interval_size)
     variations = calc_variation(histogram, num_intervals, interval_size)
-
-    print(f"variations:{variations}")
-    print(f"suma:{sums}")
-    
-    
-
-    x, y, w, h = roi
-    roi_aux = img[y:y+h, x:x+w]
-    calchist = cv2.calcHist([roi_aux],[0],None,[256],[0,256])
-    prop_preto_branco = calchist[255]/calchist[0]
-    print(f"prop_preto_branco:{calchist[255][0]/calchist[0][0]} <---------------------")
-
-    values.append(variations)
-
-    # Plotar
-    plt.figure(figsize=(10, 5))
-    plt.plot(calchist, color='black')
-    title = 'Projeção do Histograma ao Longo do Eixo X'
-    plt.title(title)
-    plt.xlabel('Posição no Eixo X')
-    plt.ylabel('Intensidade Normalizada')
-    plt.grid(True)
-
-    # Salvar graficos
-    filename = img_path[:-4].split('/')[-1]
-    graphic = "porj_" + filename + ".png"
-    plt.savefig(graphic)
-    plt.close()
 
     result = None
     best_proportion = float('-inf')  # começa com o menor valor possível
@@ -418,8 +293,6 @@ def multiple_choice_questions(img, roi, values, img_path):
             proportion = variations[j] / sums[j]
             if proportion > best_proportion:
                 best_proportion = proportion
-                print(f"best porportion: {best_proportion}")
-                
                 result = j
 
     return result
@@ -448,9 +321,27 @@ def binary_questions(histogram):
 
 def scalar_question(histogram):
 
+    # Extrai o campo central de cada tupla do histograma (índice 1)
+    central_values = [tup[1] for tup in histogram[2:-2]]
+    
+    # Calcula os valores absolutos
+    absolute_values = np.abs(central_values)
+
+    # Determina inicio e final do recorte do histograma 
+    for i in range(len(absolute_values)):
+        if absolute_values[i] < 0.9:
+            idx_start = i
+            break
+    for i in range(len(absolute_values)-1, 0, -1):
+        if absolute_values[i] < 0.9:
+            idx_end = i
+            break
+
+    aux_hist = absolute_values[idx_start: idx_end]
+
     # Divide o eixo X do histograma cortado em 10 intervalos iguais
     num_intervals = 10
-    interval_size = len(histogram) // num_intervals
+    interval_size = len(aux_hist) // num_intervals
 
     # Calcula a variância para cada intervalo no eixo X
     sums = []
@@ -458,7 +349,7 @@ def scalar_question(histogram):
         count = 0
         start_interval = j * interval_size
         end_interval = (j + 1) * interval_size
-        count = np.sum(histogram[start_interval:end_interval])
+        count = np.sum(aux_hist[start_interval:end_interval])
         sums.append(count)
 
     # Encontra o intervalo com a menor soma
@@ -466,16 +357,14 @@ def scalar_question(histogram):
     return min_sum_idx
 
 
-def segment_form(img, rois, img_path, values):
+def segment_form(img, rois):
 
     results = []
 
     # Itera sobre as áreas de interesse e obtém as respostas do formulário
     for i in range(len(rois)):
         if i <= 5:
-            result = multiple_choice_questions(img, rois[i], values, img_path)
-            filename = img_path[:-4].split('/')[-1] + ".png"
-            print(f"{filename} -> {result}\n")
+            result = multiple_choice_questions(img, rois[i])
         else:
             # Calcula o histograma
             histogram = calc_histogram(img, rois[i])
@@ -602,7 +491,6 @@ def generate_img_out(results, output_dir):
 
         filename = result[0][:-4].split('/')[-1]
         filename = output_dir + "/" + filename + ".out.png"
-        print(f"Gerando imagem {filename}")
         cv2.imwrite(filename, img)
 
 
@@ -610,7 +498,6 @@ def main(input_dir, output_dir=None):
 
     # Lista de resultados
     results = []
-    values = []
 
     # Processa os arqs do diretório de entrada
     for arquivo in os.listdir(input_dir):
@@ -618,48 +505,46 @@ def main(input_dir, output_dir=None):
         # Obtém o caminho relativo ao arquivo
         img_path = os.path.join(input_dir, arquivo)
 
-        img_gray = cv2.imread(img_path)
-        original_name = img_path
-
-        # Aplicar a binarização 
-        ret , img_bin = cv2.threshold(img_gray , 127 , 255 , cv2.THRESH_BINARY)
-
-        if is_image(img_path):
-
-            print(f"Processando imagem {arquivo}...")
-
-            # Lista de áreas de interesse
-            rois = []
-
-            # Remove os ruídos (linhas pretas contínuas)
-            clean_img = remove_noise(img_bin)
-
-            #bolder_img = highlight_img(clean_img)
-
-            # Define o limiar referencial para calculo das áreas de interesse
-            x, y = define_threshold(clean_img)
-            print(x,y)
-
-            if (isForm_1(img_path)):
-                rois = define_rois(1, x, y, clean_img, img_path)
-            else:
-                rois = define_rois(2, x, y, clean_img, img_path)
-
-            # Segmentar os formulários
-            form_results = segment_form(clean_img, rois, img_path, values)
-
-            """
-            # Armazena o registro dos metadados do formulário
-            register = (original_name, form_results)
-            results.append(register)"""
-
+        img = cv2.imread(img_path)
+        if img is None:
+            print(f"Não foi possível ler a imagem em {img_path}.")
+            continue
         else:
-            print(f"{arquivo} não é uma imagem. Ignorando...")
+            original_name = img_path
 
-    values.sort()
-    print(values)
-    """if results:
-        print("Gerando results.txt ...")
+            if is_image(img_path):
+
+                print(f"Processando imagem {img_path[:-4].split('/')[-1]}.")
+
+                # Lista de áreas de interesse
+                rois = []
+
+                # Remove os ruídos (linhas pretas contínuas)
+                clean_img = remove_noise(img)
+
+                # Define o limiar referencial para calculo das áreas de interesse
+                x, y = define_threshold(clean_img)
+                print(x,y)
+
+                if (isForm_1(img_path)):
+                    rois = define_rois(1, x, y)
+                else:
+                    rois = define_rois(2, x, y)
+                    clean_img = remove_labels(clean_img)
+
+                # Segmentar os formulários
+                form_results = segment_form(clean_img, rois)
+
+                # Armazena o registro dos metadados do formulário
+                register = (original_name, form_results)
+                results.append(register)
+
+            else:
+                print(f"{arquivo} não é uma imagem. Ignorando...")
+
+    if results:
+        print("Gerando results.txt")
+        # Gerando arquivo results
         generate_txt(results)
 
     if output_dir:
@@ -667,8 +552,9 @@ def main(input_dir, output_dir=None):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
-        print("Gerando imagens out ...")
-        generate_img_out(results, output_dir)"""
+        # Gerando imagens out
+        print("Gerando imagens de saída...")
+        generate_img_out(results, output_dir)
 
 
 if __name__ == "__main__":
