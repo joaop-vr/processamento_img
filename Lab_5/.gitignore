@@ -1,0 +1,13 @@
+macroscopic0*
+train
+test
+train_reduzido
+test_reduzido
+model*
+validation
+test_plus_validation
+data_augmentation
+test_plus_validation_augmented
+train_augmented
+test_augmented
+validation_augmented
