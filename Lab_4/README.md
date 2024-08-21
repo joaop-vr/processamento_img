@@ -6,8 +6,9 @@
 Este projeto consiste em desenvolver um programa em Python que processa formulários de satisfação preenchidos por hóspedes de um hotel no Paquistão. O objetivo é extrair as respostas de 10 perguntas específicas desses formulários e converter essas informações em um formato que permita a geração de estatísticas.
 
 ### Estrutura do Projeto
-- **forms.py**: O script principal que realiza todo o processamento.
-- **Exemplo de formulários**: Imagens de formulários de exemplo que são utilizadas para testar o programa.
+- **forms_segmentacao_manual.py**: O script principal que realiza todo o processamento de forma a segmentar as imagens manualmente.
+- **forms_segmentacao_relativa.py**: O script principal que realiza todo o processamento de forma a segmentar as imagens a partir de um marco-zero comum a todas imagens.
+- **Archive.zip**: Imagens de formulários de exemplo que são utilizadas para testar o programa.
 
 ### Requisitos
 1. **Processamento de Formulários**: O programa deve processar todos os formulários do diretório de entrada.
